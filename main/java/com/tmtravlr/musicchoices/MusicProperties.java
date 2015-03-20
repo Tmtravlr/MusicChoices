@@ -5,11 +5,14 @@ import java.util.*;
 import com.tmtravlr.musicchoices.MusicChoicesMusicTicker.BackgroundMusic;
 import com.tmtravlr.musicchoices.musicloader.MusicPropertyList;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MusicTicker;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiWinGame;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
@@ -164,6 +167,9 @@ public class MusicProperties {
 		boolean isArtificialLight = chunk.getSavedLightValue(EnumSkyBlock.Block, x & 15, y, z & 15) >= 7;
 		boolean isSky = chunk.getSavedLightValue(EnumSkyBlock.Sky, x & 15, y, z & 15) >= 7;
 		boolean isDay = mc.theWorld.getSunBrightness(1.0F) > 0.751F;
+		boolean isRain = mc.theWorld.isRaining() && !mc.theWorld.isThundering();
+		boolean isStorm = mc.theWorld.isThundering();
+		boolean isClear = !(isRain || isStorm);
 		
 		//Check if the player is in the right gamemode
 		if(!properties.allGamemodes) {
@@ -204,7 +210,6 @@ public class MusicProperties {
 		}
 		
 		if(properties.lighting != null) {
-			//Check all the conditions
 			if(isSky && isDay && !properties.lighting.contains("sun")) {
 				return false;
 			}
@@ -222,9 +227,81 @@ public class MusicProperties {
 			}
 		}
 		
-		//TODO: weather, height, blocks, and entities
+		if(properties.weather != null) {
+			if(isRain && !properties.weather.contains("rain")) {
+				return false;
+			}
+			
+			if(isStorm && !properties.weather.contains("storm")) {
+				return false;
+			}
+			
+			if(isClear && !properties.weather.contains("clear")) {
+				return false;
+			}
+		}
+		
+		//Check the height
+		
+		if(y < properties.heightMin) {
+			return false;
+		}
+		
+		if(y > properties.heightMax) {
+			return false;
+		}
+		
+		//Blocks
+		
+		if(!properties.blocks.isEmpty()) {
+			for(String blockName : properties.blocks) {
+				if(!checkForBlockInBoundingBox(blockName, 7, x, y ,z)) {
+					return false;
+				}
+			}
+		}
+		
+		//Entities
+		
+		if(!properties.entities.isEmpty()) {
+			List<Entity> entityList = mc.theWorld.getEntitiesWithinAABBExcludingEntity(null, AxisAlignedBB.getBoundingBox(x-7, y-7, z-7, x+7, y+7, z+7));
+			ArrayList<String> allEntityNames = new ArrayList<String>();
+
+			for(Entity entity : entityList) {
+				allEntityNames.add(entity.getCommandSenderName());
+			}
+			
+			for(String entityName : properties.entities) {
+				if(!allEntityNames.contains(entityName)) {
+					return false;
+				}
+			}
+		}
 		
 		return true;
+	}
+	
+	public static boolean checkForBlockInBoundingBox(String blockName, int radius, int posX, int posY, int posZ) {
+		
+		Object blockObj = Block.blockRegistry.getObject(blockName);
+		
+		if(blockObj == null || !(blockObj instanceof Block)) {
+			return false;
+		}
+		
+		Block block = (Block) blockObj;
+		
+		for(int x = -radius; x <= radius; x++) {
+			for(int y = -radius; y <= radius; y++) {
+				for(int z = -radius; z <= radius; z++) {
+					if(mc.theWorld.getBlock(posX + x, posY + y, posZ + z) == block) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	

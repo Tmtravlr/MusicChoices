@@ -9,6 +9,7 @@ import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.MusicTicker;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundCategory;
+import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
@@ -31,27 +32,6 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 	public float globalBgFadeVolume = 1.0f;
 	
 	public int delay = 100;
-	
-	/***** Properties! ******/
-	
-	/** Maximum number of "background" tracks that can play at once. */
-	public static int maxBackground = 3;
-	
-	/** Maximum number of "overtop" tracks that can play at once that don't have overlap set to true. */
-	public static int maxOvertop = 1;
-	
-	/** How much the background music should fade when music plays over top of it. */
-	public static float backgroundFade = 0.4f;
-	
-	/** Tick delay for the menu music */
-	public static int menuTickDelayMin = -1;
-	public static int menuTickDelayMax = -1;
-	
-	/** Tick delay for all ingame music */
-	public static int ingameTickDelayMin = -1;
-	public static int ingameTickDelayMax = -1;
-	
-	/************************/
 	
 	public MusicChoicesMusicTicker(Minecraft minecraft) {
 		super(minecraft);
@@ -95,7 +75,12 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 					}
 					
 					it.remove();
-					this.delay = Math.min(MathHelper.getRandomIntegerInRange(this.RAND, vanillaMusicType.func_148634_b(), vanillaMusicType.func_148633_c()), this.delay);
+					if(MC.currentScreen instanceof GuiMainMenu || MC.thePlayer == null) {
+						this.delay = Math.min(MathHelper.getRandomIntegerInRange(this.RAND, MusicChoicesMod.menuTickDelayMin/*vanillaMusicType.func_148634_b()*/, MusicChoicesMod.menuTickDelayMax/*vanillaMusicType.func_148633_c()*/), this.delay);
+					}
+					else {
+						this.delay = Math.min(MathHelper.getRandomIntegerInRange(this.RAND, MusicChoicesMod.ingameTickDelayMin/*vanillaMusicType.func_148634_b()*/, MusicChoicesMod.ingameTickDelayMax/*vanillaMusicType.func_148633_c()*/), this.delay);
+					}
 				}
 			}
 			
@@ -183,7 +168,7 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 			
 			//Remove the first music which isn't playing if we reached our limit
 			
-			if(backgroundQueue.size() >= maxBackground) {
+			if(backgroundQueue.size() >= MusicChoicesMod.maxBackground) {
 				Iterator it = backgroundQueue.iterator();
 				
 				while(it.hasNext()) {
@@ -237,7 +222,7 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 		if(properties == null || !properties.overlap) {
 			this.globalBgFadeVolume = 0.001f;
 			
-			if(this.overtopQueue.size() >= maxOvertop) {
+			if(this.overtopQueue.size() >= MusicChoicesMod.maxOvertop) {
 				//We reached the limit! Replace the oldest one.
 				OvertopMusic toRemove = overtopQueue.removeFirst();
 				
@@ -247,7 +232,7 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 			}
 		}
 		else {
-			this.globalBgFadeVolume = Math.min(this.backgroundFade, this.globalBgFadeVolume);
+			this.globalBgFadeVolume = Math.min(MusicChoicesMod.backgroundFade, this.globalBgFadeVolume);
 		}
 		
 		//Add the music track to the end of the queue.
