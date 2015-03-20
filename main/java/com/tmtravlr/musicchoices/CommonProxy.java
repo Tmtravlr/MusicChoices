@@ -1,6 +1,23 @@
 package com.tmtravlr.musicchoices;
 
-public class CommonProxy
-{
-    public void registerEventHandlers() {}
+/**
+ * Common Proxy
+ * 
+ * @author Rebeca Rey
+ * @Date Febuary 2015 
+ */
+public class CommonProxy {
+
+	public void registerEventHandlers() {
+		//Do nothing on the server.
+	}
+	
+	public void registerTickHandlers() {
+		//Do nothing on the server.
+	}
+	
+	public void registerResourceReloadListeners() {
+		//Do nothing on the server.
+	}
+	
 }
