@@ -21,6 +21,7 @@ import net.minecraft.client.audio.SoundListSerializer;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -114,7 +115,34 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
 			return;
 		}
 		
+		//Do boss and victory entries
+		
+		if(!propertyList.bossTags.isEmpty()) {
+			for(NBTTagCompound tag : propertyList.bossTags) {
+				ArrayList<MusicProperties> bossEntry = MusicProperties.bossMap.get(tag);
+				if(bossEntry == null) {
+					bossEntry = new ArrayList<MusicProperties>();
+				}
+				bossEntry.add(entry);
+				MusicProperties.bossMap.put(tag, bossEntry);
+				return;
+			}
+		}
+		
+		if(!propertyList.victoryTags.isEmpty()) {
+			for(NBTTagCompound tag : propertyList.victoryTags) {
+				ArrayList<MusicProperties> victoryEntry = MusicProperties.victoryMap.get(tag);
+				if(victoryEntry == null) {
+					victoryEntry = new ArrayList<MusicProperties>();
+				}
+				victoryEntry.add(entry);
+				MusicProperties.victoryMap.put(tag, victoryEntry);
+				return;
+			}
+		}
+		
 		//Do event entries
+		
 		if(propertyList.event != null) {
 			if(propertyList.event.equalsIgnoreCase("login")) {
 				MusicProperties.loginList.add(entry);

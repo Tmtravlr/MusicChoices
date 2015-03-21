@@ -12,6 +12,10 @@ import net.minecraft.client.audio.MusicTicker;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiWinGame;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -50,6 +54,10 @@ public class MusicProperties {
 	
 	public static HashMap<String, ArrayList<MusicProperties>> achievementMap = new HashMap<String, ArrayList<MusicProperties>>();
 	
+	public static HashMap<NBTTagCompound, ArrayList<MusicProperties>> bossMap = new HashMap<NBTTagCompound, ArrayList<MusicProperties>>();
+	
+	public static HashMap<NBTTagCompound, ArrayList<MusicProperties>> victoryMap = new HashMap<NBTTagCompound, ArrayList<MusicProperties>>();
+	
 	public static ArrayList<MusicProperties> ingameList = new ArrayList<MusicProperties>();
 	
 	
@@ -64,11 +72,9 @@ public class MusicProperties {
 		sunriseList.clear();
 		sunsetList.clear();
 		ingameList.clear();
-		for(String ach : achievementMap.keySet()) {
-			if(achievementMap.get(ach) != null) {
-				achievementMap.get(ach).clear();
-			}
-		}
+		achievementMap.clear();
+		bossMap.clear();
+		victoryMap.clear();
 	}
 	
 	//Find a music track that should be playing based on the state the game is currently in
@@ -87,6 +93,91 @@ public class MusicProperties {
 		}
 		
 		return null;
+	}
+	
+	//Find music to play for this entity, if it's a boss
+	public static MusicProperties findBossBattleMusic(EntityLivingBase entity) {
+		ArrayList<ArrayList<MusicProperties>> applicableLists = new ArrayList<ArrayList<MusicProperties>>();
+		
+		for(NBTTagCompound bossTag : bossMap.keySet()) {
+			ArrayList<MusicProperties> bossList = bossMap.get(bossTag);
+			
+			if(bossList != null && !bossList.isEmpty()) {
+				NBTTagCompound entityTag = new NBTTagCompound();
+				entity.writeToNBT(entityTag);
+				entityTag.setString("id", EntityList.getEntityString(entity));
+				if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Entity tag: " + entityTag);
+				
+				//Check that the entity has all tags
+				if(hasAllTags(bossTag, entityTag)) {
+					applicableLists.add(bossList);
+				}
+			}
+		}
+		
+		if(!applicableLists.isEmpty()) {
+			ArrayList<MusicProperties> bossList = applicableLists.get(rand.nextInt(applicableLists.size()));
+			return findTrackForCurrentSituationFromList(bossList);
+		}
+		
+		return null;
+	}
+	
+	//Find victory music to play when this entity is killed.
+	public static MusicProperties findBossVictoryMusic(EntityLivingBase entity) {
+		ArrayList<ArrayList<MusicProperties>> applicableLists = new ArrayList<ArrayList<MusicProperties>>();
+		
+		for(NBTTagCompound victoryTag : victoryMap.keySet()) {
+			ArrayList<MusicProperties> victoryList = victoryMap.get(victoryTag);
+			
+			if(victoryList != null && !victoryList.isEmpty()) {
+				NBTTagCompound entityTag = new NBTTagCompound();
+				entity.writeToNBT(entityTag);
+				entityTag.setString("id", EntityList.getEntityString(entity));
+				
+				//Check that the entity has all tags
+				if(hasAllTags(victoryTag, entityTag)) {
+					applicableLists.add(victoryList);
+				}
+			}
+		}
+		
+		if(!applicableLists.isEmpty()) {
+			ArrayList<MusicProperties> victoryList = applicableLists.get(rand.nextInt(applicableLists.size()));
+			return findTrackForCurrentSituationFromList(victoryList);
+		}
+		
+		return null;
+	}
+	
+	//Check that the target nbt tag has all the ones it should have
+	public static boolean hasAllTags(NBTTagCompound tagToHave, NBTTagCompound target) {
+		
+		Set<String> tagMap = tagToHave.func_150296_c();
+		for(String tag : tagMap) {
+//			if(tagToHave.func_150299_b(tag) == 9 && target.func_150299_b(tag) == 9) {
+//				NBTTagList targetList = (NBTTagList)target.getTag(tag);
+//				NBTTagList compareList = (NBTTagList)tagToHave.getTag(tag);
+//				
+//				if(targetList.func_150303_d() == compareList.func_150303_d()) {
+//					if(targetList.func_150303_d() == 2)
+//					if(targetList.func_150303_d() == 10) {
+//						
+//					}
+//					else {
+//						
+//					}
+//				}
+//			}
+			if(tagToHave.func_150299_b(tag) == 10 && target.func_150299_b(tag) == 10) {
+				return hasAllTags(tagToHave.getCompoundTag(tag), target.getCompoundTag(tag));
+			}
+			if(!tagToHave.getTag(tag).equals(target.getTag(tag))) {
+				return false;
+			}
+		}
+			
+		return true;
 	}
 	
 	//Find a music track that should be playing in the player's current situation from the given list

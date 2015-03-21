@@ -6,6 +6,10 @@ import java.util.HashSet;
 
 import net.minecraft.client.audio.SoundCategory;
 import net.minecraft.client.audio.SoundList;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.JsonUtils;
 
 import org.apache.commons.lang3.Validate;
@@ -72,11 +76,65 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 		}
 
 		if(jsonObject.has("boss")) {
-			//TODO
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as boss music.");
+			String nbtString = JsonUtils.getJsonObjectStringFieldValue(jsonObject, "boss");
+			NBTTagCompound tag = null;
+			try {
+                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+
+                if (nbtbase instanceof NBTTagCompound) {
+                	tag = (NBTTagCompound)nbtbase;
+                }
+            }
+            catch (NBTException nbtexception)
+            {
+            	System.out.println("[Music Choices]     - Problem while loading boss music!");
+            }
+			if(tag != null) {
+				
+				properties.bossTags.add(tag);
+				
+				if(tag.hasKey("id")) {
+					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss is " + tag.getString("id"));
+				}
+				else {
+					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss tag is " + nbtString);
+				}
+			}
+			else {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize boss tag. =(");
+			}
 		}
 
 		if(jsonObject.has("victory")) {
-			//TODO
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as victory music.");
+			String nbtString = JsonUtils.getJsonObjectStringFieldValue(jsonObject, "victory");
+			NBTTagCompound tag = null;
+			try {
+                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+
+                if (nbtbase instanceof NBTTagCompound) {
+                	tag = (NBTTagCompound)nbtbase;
+                }
+            }
+            catch (NBTException nbtexception)
+            {
+            	System.out.println("[Music Choices]     - Problem while loading victory music!");
+            }
+			if(tag != null) {
+				
+				properties.victoryTags.add(tag);
+				
+				if(tag.hasKey("id")) {
+					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory is " + tag.getString("id"));
+				}
+				else {
+					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory tag is " + nbtString);
+				}
+			}
+			else {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize victory tag. =(");
+			}
 		}
 
 		if(jsonObject.has("achievements")) {
@@ -135,7 +193,7 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 			}
 			else {
 				properties.allGamemodes = false;
-				properties.creative = JsonUtils.getJsonElementBooleanValue(jsonElement, "creative");
+				properties.creative = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "creative", false);
 				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - creative is " + properties.creative);
 			}
 		}

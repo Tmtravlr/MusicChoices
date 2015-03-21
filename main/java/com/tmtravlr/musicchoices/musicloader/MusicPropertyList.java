@@ -8,6 +8,7 @@ import java.util.List;
 import scala.actors.threadpool.Arrays;
 import net.minecraft.client.audio.SoundCategory;
 import net.minecraft.client.audio.SoundList;
+import net.minecraft.nbt.NBTTagCompound;
 
 import com.google.common.collect.Lists;
 
@@ -35,10 +36,10 @@ public class MusicPropertyList {
 	public boolean credits = false;
 
 	//Which bosses the boss battle music should play for
-	public HashMap<String, String> bossMap = new HashMap<String, String>();
+	public HashSet<NBTTagCompound> bossTags = new HashSet<NBTTagCompound>();
 
 	//Which bosses the victory music should play for
-	public HashMap<String, String> victoryMap = new HashMap<String, String>();
+	public HashSet<NBTTagCompound> victoryTags = new HashSet<NBTTagCompound>();
 
 	//Play for all achievements?
 	public boolean allAchievements = false;
