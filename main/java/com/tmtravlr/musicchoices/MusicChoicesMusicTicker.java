@@ -200,6 +200,7 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 				if(MusicProperties.checkIfMusicStillApplies(backMusic, vanillaMusicType)) {
 					backMusic.music.primary = true;
 					foundCurrentlyPlaying = true;
+					break;
 				}
 			}
 		}

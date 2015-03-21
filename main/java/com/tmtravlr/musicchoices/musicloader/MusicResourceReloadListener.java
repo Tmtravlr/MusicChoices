@@ -73,7 +73,7 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
 
                     try
                     {
-                    	if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Loading in a Sounds.json file.");
+                    	if (MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Loading in a Sounds.json file.");
                     	
                         Map map = (Map)GSON.fromJson(new InputStreamReader(iresource.getInputStream()), TYPE);
                         Iterator iterator2 = map.entrySet().iterator();
@@ -82,9 +82,14 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
                             Entry entry = (Entry)iterator2.next();
                             
                             //Don't load in music that isn't meant to be loaded in.
-                        	if(entry.getValue() != null && ((MusicPropertyList)entry.getValue()).valid) {
-                        		if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Loading properties for " + s + ":" + (String)entry.getKey());
-                        		this.loadMusicProperties(s, (String)entry.getKey(), (MusicPropertyList)entry.getValue());
+                        	if (entry.getValue() != null) { 
+                        		if (((MusicPropertyList)entry.getValue()).isMusic) {
+	                        		if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Loading properties for " + s + ":" + (String)entry.getKey());
+	                        		this.loadMusicProperties(s, (String)entry.getKey(), (MusicPropertyList)entry.getValue());
+	                        	}
+                        		else if (((MusicPropertyList)entry.getValue()).isOptions && !MusicChoicesMod.overrideJsonOptions) {
+                        			this.loadMusicOptions((MusicPropertyList)entry.getValue());
+                        		}
                         	}
                         }
                     }
@@ -100,6 +105,50 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
                 ;
             }
         }
+	}
+	
+	private void loadMusicOptions(MusicPropertyList propertyList) {
+		if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loading options.");
+		
+		if(propertyList.maxBackground > 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded max background as " + propertyList.maxBackground);
+			MusicChoicesMod.maxBackground = propertyList.maxBackground;
+		}
+		
+		if(propertyList.maxOvertop > 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded max overtop as " + propertyList.maxOvertop);
+			MusicChoicesMod.maxOvertop = propertyList.maxOvertop;
+		}
+		
+		if(propertyList.backgroundFade > 0.0001f) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded background fade as " + propertyList.backgroundFade);
+			MusicChoicesMod.backgroundFade = propertyList.backgroundFade;
+		}
+		
+		if(propertyList.fadeStrength > 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded fade strength as " + propertyList.fadeStrength);
+			MusicChoicesMod.fadeStrength = propertyList.fadeStrength;
+		}
+		
+		if(propertyList.menuTickDelayMin >= 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded min menu tick as " + propertyList.menuTickDelayMin);
+			MusicChoicesMod.menuTickDelayMin = propertyList.menuTickDelayMin;
+		}
+		
+		if(propertyList.menuTickDelayMax >= 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded max menu tick as " + propertyList.menuTickDelayMax);
+			MusicChoicesMod.menuTickDelayMax = propertyList.menuTickDelayMax;
+		}
+		
+		if(propertyList.ingameTickDelayMin >= 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded min ingame tick as " + propertyList.ingameTickDelayMin);
+			MusicChoicesMod.ingameTickDelayMin = propertyList.ingameTickDelayMin;
+		}
+		
+		if(propertyList.ingameTickDelayMax >= 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded max ingame tick as " + propertyList.ingameTickDelayMax);
+			MusicChoicesMod.ingameTickDelayMax = propertyList.ingameTickDelayMax;
+		}
 	}
 	
 	private void loadMusicProperties(String domain, String name, MusicPropertyList propertyList) {

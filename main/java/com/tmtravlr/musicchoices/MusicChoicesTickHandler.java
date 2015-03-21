@@ -195,16 +195,16 @@ public class MusicChoicesTickHandler {
 	}
 	
 	private Entity findEntityLookedAt() {
-		int d0 = 1000;
+		int distance = 1000;
 		
 		Vec3 vecPos = this.mc.renderViewEntity.getPosition(0);
 		Vec3 vecLook = this.mc.renderViewEntity.getLook(0);
-        Vec3 vecPosLook = vecPos.addVector(vecLook.xCoord * d0, vecLook.yCoord * d0, vecLook.zCoord * d0);
+        Vec3 vecPosLook = vecPos.addVector(vecLook.xCoord * distance, vecLook.yCoord * distance, vecLook.zCoord * distance);
         Entity pointedEntity = null;
         Vec3 vecHit = null;
         float expansion = 1.0F;
-        List entityList = this.mc.theWorld.getEntitiesWithinAABBExcludingEntity(this.mc.renderViewEntity, this.mc.renderViewEntity.boundingBox.addCoord(vecLook.xCoord * d0, vecLook.yCoord * d0, vecLook.zCoord * d0).expand((double)expansion, (double)expansion, (double)expansion));
-        double d2 = d0;
+        List entityList = this.mc.theWorld.getEntitiesWithinAABBExcludingEntity(this.mc.renderViewEntity, this.mc.renderViewEntity.boundingBox.addCoord(vecLook.xCoord * distance, vecLook.yCoord * distance, vecLook.zCoord * distance).expand((double)expansion, (double)expansion, (double)expansion));
+        double d2 = distance;
 
         for (int i = 0; i < entityList.size(); ++i)
         {

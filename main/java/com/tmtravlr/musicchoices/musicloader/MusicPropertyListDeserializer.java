@@ -32,9 +32,73 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 	public MusicPropertyList deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context)
 	{
 		if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Found an entry!");
+		
 		JsonElement otherElement;
 		JsonObject jsonObject = JsonUtils.getJsonElementAsJsonObject(jsonElement, "entry");
 		MusicPropertyList properties = new MusicPropertyList();
+		
+		
+		properties.isOptions = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "options", false);
+
+		if(properties.isOptions) {
+			
+			//Load options
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Found a Music Choices options entry!");
+			
+			if(jsonObject.has("maximum background tracks")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found maximum background tracks entry.");
+				properties.maxBackground = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "maximum background tracks", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - maximum background tracks is " + properties.maxBackground);
+			}
+			
+			if(jsonObject.has("maximum overtop tracks")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found maximum overtop tracks entry.");
+				properties.maxOvertop = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "maximum overtop tracks", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - maximum overtop tracks is " + properties.maxOvertop);
+			}
+			
+			if(jsonObject.has("background fade")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found background fade entry.");
+				properties.backgroundFade = JsonUtils.getJsonObjectFloatFieldValueOrDefault(jsonObject, "background fade", -1.0f);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - background fade is " + properties.backgroundFade);
+			}
+			
+			if(jsonObject.has("fade strength")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found fade strength entry.");
+				properties.fadeStrength = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "fade strength", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - fade strength is " + properties.fadeStrength);
+			}
+			
+			if(jsonObject.has("menu music delay minimum")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found menu music delay minimum entry.");
+				properties.menuTickDelayMin = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "menu music delay minimum", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - menu music delay minimum is " + properties.menuTickDelayMin);
+			}
+			
+			if(jsonObject.has("menu music delay maximum")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found menu music delay maximum entry.");
+				properties.menuTickDelayMax = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "menu music delay maximum", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - menu music delay maximum is " + properties.menuTickDelayMax);
+			}
+			
+			if(jsonObject.has("ingame music delay minimum")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found ingame music delay minimum entry.");
+				properties.ingameTickDelayMin = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "ingame music delay minimum", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - ingame music delay minimum is " + properties.ingameTickDelayMin);
+			}
+			
+			if(jsonObject.has("ingame music delay maximum")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found ingame music delay maximum entry.");
+				properties.ingameTickDelayMax = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "ingame music delay maximum", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - ingame music delay maximum is " + properties.ingameTickDelayMax);
+			}
+			
+			return properties;
+		}
+		
+		//If it reaches here, this must be music, not options.
+		
+		//Load music
 
 		SoundCategory category = SoundCategory.func_147154_a(JsonUtils.getJsonObjectStringFieldValueOrDefault(jsonObject, "category", SoundCategory.MASTER.getCategoryName()));
 		Validate.notNull(category, "Invalid category", new Object[0]);
@@ -48,9 +112,9 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 
 		//Load in the properties
 
-		properties.valid = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "musicchoices", false);
+		properties.isMusic = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "musicchoices", false);
 
-		if(!properties.valid) {
+		if(!properties.isMusic) {
 			//Don't do anything if this shouldn't be handled by Music Choices!
 			return null;
 		}
@@ -77,63 +141,79 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 
 		if(jsonObject.has("boss")) {
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as boss music.");
-			String nbtString = JsonUtils.getJsonObjectStringFieldValue(jsonObject, "boss");
-			NBTTagCompound tag = null;
-			try {
-                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+			otherElement = jsonObject.get("boss");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "boss")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "boss");
 
-                if (nbtbase instanceof NBTTagCompound) {
-                	tag = (NBTTagCompound)nbtbase;
-                }
-            }
-            catch (NBTException nbtexception)
-            {
-            	System.out.println("[Music Choices]     - Problem while loading boss music!");
-            }
-			if(tag != null) {
-				
-				properties.bossTags.add(tag);
-				
-				if(tag.hasKey("id")) {
-					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss is " + tag.getString("id"));
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String nbtString = JsonUtils.getJsonElementStringValue(otherElement, "boss entry");
+					NBTTagCompound tag = null;
+					try {
+		                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+		
+		                if (nbtbase instanceof NBTTagCompound) {
+		                	tag = (NBTTagCompound)nbtbase;
+		                }
+		            }
+		            catch (NBTException nbtexception)
+		            {
+		            	System.out.println("[Music Choices]     - Problem while loading boss music!");
+		            }
+					if(tag != null) {
+						
+						properties.bossTags.add(tag);
+						
+						if(tag.hasKey("id")) {
+							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss is " + tag.getString("id"));
+						}
+						else {
+							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss tag is " + nbtString);
+						}
+					}
+					else {
+						if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize boss tag. =(");
+					}
 				}
-				else {
-					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss tag is " + nbtString);
-				}
-			}
-			else {
-				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize boss tag. =(");
 			}
 		}
 
 		if(jsonObject.has("victory")) {
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as victory music.");
-			String nbtString = JsonUtils.getJsonObjectStringFieldValue(jsonObject, "victory");
-			NBTTagCompound tag = null;
-			try {
-                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+			otherElement = jsonObject.get("victory");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "victory")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "victory");
 
-                if (nbtbase instanceof NBTTagCompound) {
-                	tag = (NBTTagCompound)nbtbase;
-                }
-            }
-            catch (NBTException nbtexception)
-            {
-            	System.out.println("[Music Choices]     - Problem while loading victory music!");
-            }
-			if(tag != null) {
-				
-				properties.victoryTags.add(tag);
-				
-				if(tag.hasKey("id")) {
-					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory is " + tag.getString("id"));
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String nbtString = JsonUtils.getJsonElementStringValue(otherElement, "victory entry");
+					NBTTagCompound tag = null;
+					try {
+		                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+		
+		                if (nbtbase instanceof NBTTagCompound) {
+		                	tag = (NBTTagCompound)nbtbase;
+		                }
+		            }
+		            catch (NBTException nbtexception)
+		            {
+		            	System.out.println("[Music Choices]     - Problem while loading victory music!");
+		            }
+					if(tag != null) {
+						
+						properties.victoryTags.add(tag);
+						
+						if(tag.hasKey("id")) {
+							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory entity is " + tag.getString("id"));
+						}
+						else {
+							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory tag is " + nbtString);
+						}
+					}
+					else {
+						if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize victory tag. =(");
+					}
 				}
-				else {
-					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory tag is " + nbtString);
-				}
-			}
-			else {
-				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize victory tag. =(");
 			}
 		}
 

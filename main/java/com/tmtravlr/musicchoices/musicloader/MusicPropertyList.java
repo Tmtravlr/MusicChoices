@@ -23,8 +23,10 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 public class MusicPropertyList {
 
+	//Music Options
+	
 	//Whether or not this is mean to be played with Music Choices
-	public boolean valid = false;
+	public boolean isMusic = false;
 	
 	//Whether or not it should overlap with other music tracks
 	public boolean overlap = false;
@@ -83,5 +85,32 @@ public class MusicPropertyList {
 	
 	//Blocks you should be near for this music to play
 	public HashSet<String> blocks = new HashSet<String>();
-
+	
+	
+	
+	//Options entries
+	
+	//Whether this is an options entry
+	public boolean isOptions;
+	
+	/** Maximum number of "background" tracks that can play at once. */
+	public int maxBackground = -1;
+	
+	/** Maximum number of "overtop" tracks that can play at once that don't have overlap set to true. */
+	public int maxOvertop = -1;
+	
+	/** How much the background music should fade when music plays over top of it. */
+	public float backgroundFade = -1.0f;
+	
+	/** How fast the background music fades */
+	public int fadeStrength = -1;
+	
+	/** Tick delay for the menu music */
+	public int menuTickDelayMin = -1;
+	public int menuTickDelayMax = -1;
+	
+	/** Tick delay for all ingame music */
+	public int ingameTickDelayMin = -1;
+	public int ingameTickDelayMax = -1;
+	
 }
