@@ -105,7 +105,10 @@ public class MusicProperties {
 			if(bossList != null && !bossList.isEmpty()) {
 				NBTTagCompound entityTag = new NBTTagCompound();
 				entity.writeToNBT(entityTag);
-				entityTag.setString("id", EntityList.getEntityString(entity));
+				if(EntityList.getEntityString(entity) != null && !EntityList.getEntityString(entity).equals("")) {
+					entityTag.setString("id", EntityList.getEntityString(entity));
+				}
+				
 				if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Entity tag: " + entityTag);
 				
 				//Check that the entity has all tags

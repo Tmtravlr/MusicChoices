@@ -168,14 +168,16 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
 		
 		if(!propertyList.bossTags.isEmpty()) {
 			for(NBTTagCompound tag : propertyList.bossTags) {
+				//if(MusicChoicesMod.debug) System.out.println("Adding boss" + (tag.getString("id").equals("") ? "." : " called " + tag.getString("id")));
 				ArrayList<MusicProperties> bossEntry = MusicProperties.bossMap.get(tag);
 				if(bossEntry == null) {
 					bossEntry = new ArrayList<MusicProperties>();
 				}
 				bossEntry.add(entry);
 				MusicProperties.bossMap.put(tag, bossEntry);
-				return;
+				
 			}
+			return;
 		}
 		
 		if(!propertyList.victoryTags.isEmpty()) {
@@ -186,8 +188,8 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
 				}
 				victoryEntry.add(entry);
 				MusicProperties.victoryMap.put(tag, victoryEntry);
-				return;
 			}
+			return;
 		}
 		
 		//Do event entries
