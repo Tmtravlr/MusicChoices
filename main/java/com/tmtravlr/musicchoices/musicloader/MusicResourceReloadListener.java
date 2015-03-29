@@ -149,6 +149,26 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded max ingame tick as " + propertyList.ingameTickDelayMax);
 			MusicChoicesMod.ingameTickDelayMax = propertyList.ingameTickDelayMax;
 		}
+		
+		if(propertyList.doPlayVanilla) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded play vanilla as " + propertyList.playVanilla);
+			MusicChoicesMod.playVanilla = propertyList.playVanilla;
+		}
+		
+		if(propertyList.doStopTracks) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded stop tracks as " + propertyList.stopTracks);
+			MusicChoicesMod.stopTracks = propertyList.stopTracks;
+		}
+		
+		if(propertyList.battleDistance >= 0) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded battle distance as " + propertyList.battleDistance);
+			MusicChoicesMod.battleDistance = propertyList.battleDistance;
+		}
+		
+		if(propertyList.doBattleMonsterOnly) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] Loaded battle monster only as " + propertyList.battleMonsterOnly);
+			MusicChoicesMod.battleMonsterOnly = propertyList.battleMonsterOnly;
+		}
 	}
 	
 	private void loadMusicProperties(String domain, String name, MusicPropertyList propertyList) {
@@ -180,6 +200,19 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
 			return;
 		}
 		
+		if(!propertyList.bossStopTags.isEmpty()) {
+			for(NBTTagCompound tag : propertyList.bossStopTags) {
+				ArrayList<MusicProperties> bossEntry = MusicProperties.bossStopMap.get(tag);
+				if(bossEntry == null) {
+					bossEntry = new ArrayList<MusicProperties>();
+				}
+				bossEntry.add(entry);
+				MusicProperties.bossStopMap.put(tag, bossEntry);
+				
+			}
+			return;
+		}
+		
 		if(!propertyList.victoryTags.isEmpty()) {
 			for(NBTTagCompound tag : propertyList.victoryTags) {
 				ArrayList<MusicProperties> victoryEntry = MusicProperties.victoryMap.get(tag);
@@ -188,6 +221,37 @@ public class MusicResourceReloadListener implements IResourceManagerReloadListen
 				}
 				victoryEntry.add(entry);
 				MusicProperties.victoryMap.put(tag, victoryEntry);
+			}
+			return;
+		}
+		
+		//Do battle entries
+		
+		if(!propertyList.battleEntities.isEmpty()) {
+			for(String entityName : propertyList.battleEntities) {
+				ArrayList<MusicProperties> musicList = MusicProperties.battleMap.get(entityName);
+				if(musicList == null) {
+					musicList = new ArrayList<MusicProperties>();
+				}
+				musicList.add(entry);
+				MusicProperties.battleMap.put(entityName, musicList);
+			}
+			return;
+		}
+		
+		if(propertyList.battleBlacklistEntities != null && !propertyList.battleBlacklistEntities.isEmpty()) {
+			MusicProperties.battleBlacklisted.add(entry);
+			return;
+		}
+		
+		if(!propertyList.battleStopEntities.isEmpty()) {
+			for(String entityName : propertyList.battleStopEntities) {
+				ArrayList<MusicProperties> musicList = MusicProperties.battleStopMap.get(entityName);
+				if(musicList == null) {
+					musicList = new ArrayList<MusicProperties>();
+				}
+				musicList.add(entry);
+				MusicProperties.battleStopMap.put(entityName, musicList);
 			}
 			return;
 		}

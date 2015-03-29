@@ -93,6 +93,33 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - ingame music delay maximum is " + properties.ingameTickDelayMax);
 			}
 			
+			if(jsonObject.has("play vanilla")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found play vanilla entry.");
+				properties.doPlayVanilla = true;
+				properties.playVanilla = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "play vanilla", true);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - play vanilla is " + properties.playVanilla);
+			}
+			
+			if(jsonObject.has("stop tracks")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found stop tracks entry.");
+				properties.doStopTracks = true;
+				properties.stopTracks = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "stop tracks", true);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - stop tracks is " + properties.stopTracks);
+			}
+			
+			if(jsonObject.has("battle max distance")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found battle max distance entry.");
+				properties.battleDistance = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "battle max distance", -1);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - battle max distance is " + properties.battleDistance);
+			}
+			
+			if(jsonObject.has("battle music for only monsters")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Found battle music for only monsters entry.");
+				properties.doBattleMonsterOnly = true;
+				properties.battleMonsterOnly = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "battle music for only monsters", true);
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - battle music for only monsters is " + properties.battleMonsterOnly);
+			}
+			
 			return properties;
 		}
 		
@@ -126,6 +153,12 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 			properties.overlap = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(jsonObject, "overlap", false);
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - overlapping is " + properties.overlap);
 		}
+		
+		if(jsonObject.has("priority")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Has a priority.");
+			properties.priority = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(jsonObject, "priority", 1);
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - priority is " + properties.priority);
+		}
 
 		if(jsonObject.has("menu")) {
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as menu music.");
@@ -148,32 +181,21 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 				for (int i = 0; i < jsonarray.size(); ++i) {
 					otherElement = jsonarray.get(i);
 					String nbtString = JsonUtils.getJsonElementStringValue(otherElement, "boss entry");
-					NBTTagCompound tag = null;
-					try {
-		                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+					loadNBTEntry(nbtString, properties.bossTags);
+				}
+			}
+		}
 		
-		                if (nbtbase instanceof NBTTagCompound) {
-		                	tag = (NBTTagCompound)nbtbase;
-		                }
-		            }
-		            catch (NBTException nbtexception)
-		            {
-		            	System.out.println("[Music Choices]     - Problem while loading boss music!");
-		            }
-					if(tag != null) {
-						
-						properties.bossTags.add(tag);
-						
-						if(tag.hasKey("id")) {
-							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss is " + tag.getString("id"));
-						}
-						else {
-							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - boss tag is " + nbtString);
-						}
-					}
-					else {
-						if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize boss tag. =(");
-					}
+		if(jsonObject.has("boss stop")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as boss stop music.");
+			otherElement = jsonObject.get("boss stop");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "boss stop")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "boss stop");
+
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String nbtString = JsonUtils.getJsonElementStringValue(otherElement, "boss stop entry");
+					loadNBTEntry(nbtString, properties.bossStopTags);
 				}
 			}
 		}
@@ -187,32 +209,52 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 				for (int i = 0; i < jsonarray.size(); ++i) {
 					otherElement = jsonarray.get(i);
 					String nbtString = JsonUtils.getJsonElementStringValue(otherElement, "victory entry");
-					NBTTagCompound tag = null;
-					try {
-		                NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+					loadNBTEntry(nbtString, properties.victoryTags);
+				}
+			}
+		}
 		
-		                if (nbtbase instanceof NBTTagCompound) {
-		                	tag = (NBTTagCompound)nbtbase;
-		                }
-		            }
-		            catch (NBTException nbtexception)
-		            {
-		            	System.out.println("[Music Choices]     - Problem while loading victory music!");
-		            }
-					if(tag != null) {
-						
-						properties.victoryTags.add(tag);
-						
-						if(tag.hasKey("id")) {
-							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory entity is " + tag.getString("id"));
-						}
-						else {
-							if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - victory tag is " + nbtString);
-						}
-					}
-					else {
-						if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize victory tag. =(");
-					}
+		if(jsonObject.has("battle")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as battle music.");
+			otherElement = jsonObject.get("battle");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "battle")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "battle");
+
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String entity = JsonUtils.getJsonElementStringValue(otherElement, "battle entry");
+					properties.battleEntities.add(entity);
+				}
+			}
+		}
+		
+		if(jsonObject.has("battle blacklist")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as battle blacklist music.");
+			if(properties.battleBlacklistEntities == null) {
+				properties.battleBlacklistEntities = new HashSet<String>();
+			}
+			otherElement = jsonObject.get("battle blacklist");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "battle blacklist")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "battle blacklist");
+
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String entity = JsonUtils.getJsonElementStringValue(otherElement, "battle blacklist entry");
+					properties.battleBlacklistEntities.add(entity);
+				}
+			}
+		}
+		
+		if(jsonObject.has("battle stop")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as battle stop music.");
+			otherElement = jsonObject.get("battle stop");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "battle stop")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "battle stop");
+
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String entity = JsonUtils.getJsonElementStringValue(otherElement, "battle stop entry");
+					properties.battleStopEntities.add(entity);
 				}
 			}
 		}
@@ -295,6 +337,21 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 				}
 			}
 		}
+		
+		if(jsonObject.has("biome blacklist")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as biome blacklist music.");
+			otherElement = jsonObject.get("biome blacklist");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "biome blacklist")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "biome blacklist");
+
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String value = JsonUtils.getJsonElementStringValue(otherElement, "biome blacklist entry");
+					properties.biomeBlacklist.add(value);
+					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - biome is " + value);
+				}
+			}
+		}
 
 		if(jsonObject.has("biome types")) {
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as biome type music.");
@@ -313,6 +370,21 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 				}
 			}
 		}
+		
+		if(jsonObject.has("biome type blacklist")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as biome type blacklist music.");
+			otherElement = jsonObject.get("biome type blacklist");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "biome type blacklist")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "biome type blacklist");
+
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String value = JsonUtils.getJsonElementStringValue(otherElement, "biome type blacklist entry");
+					properties.biomeTypeBlacklist.add(value);
+					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - biome type is " + value);
+				}
+			}
+		}
 
 		if(jsonObject.has("dimensions")) {
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as dimension music.");
@@ -322,7 +394,7 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 
 				for (int i = 0; i < jsonarray.size(); ++i) {
 					otherElement = jsonarray.get(i);
-					int value = JsonUtils.getJsonElementIntegerValue(otherElement, "dimensions");
+					int value = JsonUtils.getJsonElementIntegerValue(otherElement, "dimensions entry");
 					if(properties.dimensions == null) {
 						properties.dimensions = new HashSet<Integer>();
 					}
@@ -340,7 +412,7 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 
 				for (int i = 0; i < jsonarray.size(); ++i) {
 					otherElement = jsonarray.get(i);
-					int value = JsonUtils.getJsonElementIntegerValue(otherElement, "dimension blacklist");
+					int value = JsonUtils.getJsonElementIntegerValue(otherElement, "dimension blacklist entry");
 					properties.dimensionBlacklist.add(value);
 					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - dimension is " + value);
 				}
@@ -395,100 +467,38 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - height maximum is " + properties.heightMax);
 		}
 
-		if(jsonObject.has("entities")) {
-			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as entity music.");
-			otherElement = jsonObject.get("entities");
-			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "entities")) {
-				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "entities");
-
-				for (int i = 0; i < jsonarray.size(); ++i) {
-					otherElement = jsonarray.get(i);
-					String value = JsonUtils.getJsonElementStringValue(otherElement, "entities");
-					properties.entities.add(value);
-					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - entity is " + value);
-				}
-			}
-		}
-
-		if(jsonObject.has("blocks")) {
-			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as block music.");
-			otherElement = jsonObject.get("blocks");
-			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "blocks")) {
-				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "blocks");
-
-				for (int i = 0; i < jsonarray.size(); ++i) {
-					otherElement = jsonarray.get(i);
-					String value = JsonUtils.getJsonElementStringValue(otherElement, "blocks");
-					properties.blocks.add(value);
-					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - block is " + value);
-				}
-			}
-		}
-
 		//Done!
 
-		//if(MusicChoicesMod.DEBUG) System.out.println("Loaded Music Properties");
-
-		//		if (jsonObject.has("sounds"))
-		//		{
-		//			
-		//
-		//			            JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonobject, "sounds");
-		//			
-		//			            for (int i = 0; i < jsonarray.size(); ++i)
-		//			            {
-		//			                JsonElement jsonelement1 = jsonarray.get(i);
-		//			                SoundList.SoundEntry soundentry = new SoundList.SoundEntry();
-		//			
-		//			                if (JsonUtils.jsonElementTypeIsString(jsonelement1))
-		//			                {
-		//			                    soundentry.setSoundEntryName(JsonUtils.getJsonElementStringValue(jsonelement1, "sound"));
-		//			                }
-		//			                else
-		//			                {
-		//			                    JsonObject jsonobject1 = JsonUtils.getJsonElementAsJsonObject(jsonelement1, "sound");
-		//			                    soundentry.setSoundEntryName(JsonUtils.getJsonObjectStringFieldValue(jsonobject1, "name"));
-		//			
-		//			                    if (jsonobject1.has("type"))
-		//			                    {
-		//			                        SoundList.SoundEntry.Type type1 = SoundList.SoundEntry.Type.getType(JsonUtils.getJsonObjectStringFieldValue(jsonobject1, "type"));
-		//			                        Validate.notNull(type1, "Invalid type", new Object[0]);
-		//			                        soundentry.setSoundEntryType(type1);
-		//			                    }
-		//			
-		//			                    float f;
-		//			
-		//			                    if (jsonobject1.has("volume"))
-		//			                    {
-		//			                        f = JsonUtils.getJsonObjectFloatFieldValue(jsonobject1, "volume");
-		//			                        Validate.isTrue(f > 0.0F, "Invalid volume", new Object[0]);
-		//			                        soundentry.setSoundEntryVolume(f);
-		//			                    }
-		//			
-		//			                    if (jsonobject1.has("pitch"))
-		//			                    {
-		//			                        f = JsonUtils.getJsonObjectFloatFieldValue(jsonobject1, "pitch");
-		//			                        Validate.isTrue(f > 0.0F, "Invalid pitch", new Object[0]);
-		//			                        soundentry.setSoundEntryPitch(f);
-		//			                    }
-		//			
-		//			                    if (jsonobject1.has("weight"))
-		//			                    {
-		//			                        int j = JsonUtils.getJsonObjectIntegerFieldValue(jsonobject1, "weight");
-		//			                        Validate.isTrue(j > 0, "Invalid weight", new Object[0]);
-		//			                        soundentry.setSoundEntryWeight(j);
-		//			                    }
-		//			
-		//			                    if (jsonobject1.has("stream"))
-		//			                    {
-		//			                        soundentry.setStreaming(JsonUtils.getJsonObjectBooleanFieldValue(jsonobject1, "stream"));
-		//			                    }
-		//			                }
-		//			
-		//			                propertyList.getSoundList().add(soundentry);
-		//			            }
-		//		}
-
 		return properties;
+	}
+	
+	private void loadNBTEntry(String nbtString, HashSet<NBTTagCompound> tagSet) {
+		NBTTagCompound tag = null;
+		try {
+            NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+
+            if (nbtbase instanceof NBTTagCompound) {
+            	tag = (NBTTagCompound)nbtbase;
+            }
+        }
+        catch (NBTException nbtexception)
+        {
+        	System.out.println("[Music Choices]     - Problem while loading NBT tag!");
+        	nbtexception.printStackTrace();
+        }
+		if(tag != null) {
+			
+			tagSet.add(tag);
+			
+			if(tag.hasKey("id")) {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - entity is " + tag.getString("id"));
+			}
+			else {
+				if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - entity tag is " + nbtString);
+			}
+		}
+		else {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - didn't recognize entity tag. =(");
+		}
 	}
 }

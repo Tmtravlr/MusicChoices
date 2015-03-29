@@ -2,7 +2,7 @@ package com.tmtravlr.musicchoices;
 
 import java.util.*;
 
-import com.tmtravlr.musicchoices.MusicChoicesMusicTicker.BackgroundMusic;
+import com.tmtravlr.musicchoices.MChHelper.BackgroundMusic;
 import com.tmtravlr.musicchoices.musicloader.MusicPropertyList;
 
 import net.minecraft.block.Block;
@@ -27,6 +27,7 @@ import net.minecraftforge.common.BiomeManager.BiomeType;
 
 /**
  * Holds info about each property for the rest of the mod to access.
+ * Also holds some static methods for selecting music from it's lists.
  * 
  * @author Rebeca Rey
  * @Date Febuary 2015 
@@ -56,7 +57,15 @@ public class MusicProperties {
 	
 	public static HashMap<NBTTagCompound, ArrayList<MusicProperties>> bossMap = new HashMap<NBTTagCompound, ArrayList<MusicProperties>>();
 	
+	public static HashMap<NBTTagCompound, ArrayList<MusicProperties>> bossStopMap = new HashMap<NBTTagCompound, ArrayList<MusicProperties>>();
+	
 	public static HashMap<NBTTagCompound, ArrayList<MusicProperties>> victoryMap = new HashMap<NBTTagCompound, ArrayList<MusicProperties>>();
+	
+	public static HashMap<String, ArrayList<MusicProperties>> battleMap = new HashMap<String, ArrayList<MusicProperties>>();
+	
+	public static ArrayList<MusicProperties> battleBlacklisted = new ArrayList<MusicProperties>();
+	
+	public static HashMap<String, ArrayList<MusicProperties>> battleStopMap = new HashMap<String, ArrayList<MusicProperties>>();
 	
 	public static ArrayList<MusicProperties> ingameList = new ArrayList<MusicProperties>();
 	
@@ -71,10 +80,14 @@ public class MusicProperties {
 		respawnList.clear();
 		sunriseList.clear();
 		sunsetList.clear();
-		ingameList.clear();
 		achievementMap.clear();
 		bossMap.clear();
+		bossStopMap.clear();
 		victoryMap.clear();
+		battleMap.clear();
+		battleBlacklisted.clear();
+		battleStopMap.clear();
+		ingameList.clear();
 	}
 	
 	//Find a music track that should be playing based on the state the game is currently in
@@ -84,10 +97,6 @@ public class MusicProperties {
 			return menuList.get(rand.nextInt(menuList.size()));
 		}
 		
-		if (!creditsList.isEmpty() && mc.currentScreen instanceof GuiWinGame) {
-			return creditsList.get(rand.nextInt(menuList.size()));
-		}
-		
 		if (!ingameList.isEmpty()) {
 			return findTrackForCurrentSituationFromList(ingameList);
 		}
@@ -95,14 +104,14 @@ public class MusicProperties {
 		return null;
 	}
 	
-	//Find music to play for this entity, if it's a boss
-	public static MusicProperties findBossBattleMusic(EntityLivingBase entity) {
+	//Attempts to find a music track from the given map that applies to the given entity.
+	public static MusicProperties findMusicFromNBTMap(EntityLivingBase entity, HashMap<NBTTagCompound, ArrayList<MusicProperties>> nbtMap) {
 		ArrayList<ArrayList<MusicProperties>> applicableLists = new ArrayList<ArrayList<MusicProperties>>();
 		
-		for(NBTTagCompound bossTag : bossMap.keySet()) {
-			ArrayList<MusicProperties> bossList = bossMap.get(bossTag);
+		for(NBTTagCompound currentTag : nbtMap.keySet()) {
+			ArrayList<MusicProperties> currentList = nbtMap.get(currentTag);
 			
-			if(bossList != null && !bossList.isEmpty()) {
+			if(currentList != null && !currentList.isEmpty()) {
 				NBTTagCompound entityTag = new NBTTagCompound();
 				entity.writeToNBT(entityTag);
 				if(EntityList.getEntityString(entity) != null && !EntityList.getEntityString(entity).equals("")) {
@@ -112,42 +121,25 @@ public class MusicProperties {
 				if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Entity tag: " + entityTag);
 				
 				//Check that the entity has all tags
-				if(hasAllTags(bossTag, entityTag)) {
-					applicableLists.add(bossList);
+				if(hasAllTags(currentTag, entityTag)) {
+					applicableLists.add(currentList);
 				}
 			}
 		}
 		
 		if(!applicableLists.isEmpty()) {
-			ArrayList<MusicProperties> bossList = applicableLists.get(rand.nextInt(applicableLists.size()));
-			return findTrackForCurrentSituationFromList(bossList);
+			ArrayList<MusicProperties> returnList = applicableLists.get(rand.nextInt(applicableLists.size()));
+			return findTrackForCurrentSituationFromList(returnList);
 		}
 		
 		return null;
 	}
 	
-	//Find victory music to play when this entity is killed.
-	public static MusicProperties findBossVictoryMusic(EntityLivingBase entity) {
-		ArrayList<ArrayList<MusicProperties>> applicableLists = new ArrayList<ArrayList<MusicProperties>>();
+	public static MusicProperties findMusicFromStringMap(String string, HashMap<String, ArrayList<MusicProperties>> stringMap) {
+		ArrayList<MusicProperties> musicList = stringMap.get(string);
 		
-		for(NBTTagCompound victoryTag : victoryMap.keySet()) {
-			ArrayList<MusicProperties> victoryList = victoryMap.get(victoryTag);
-			
-			if(victoryList != null && !victoryList.isEmpty()) {
-				NBTTagCompound entityTag = new NBTTagCompound();
-				entity.writeToNBT(entityTag);
-				entityTag.setString("id", EntityList.getEntityString(entity));
-				
-				//Check that the entity has all tags
-				if(hasAllTags(victoryTag, entityTag)) {
-					applicableLists.add(victoryList);
-				}
-			}
-		}
-		
-		if(!applicableLists.isEmpty()) {
-			ArrayList<MusicProperties> victoryList = applicableLists.get(rand.nextInt(applicableLists.size()));
-			return findTrackForCurrentSituationFromList(victoryList);
+		if(musicList != null) {
+			return findTrackForCurrentSituationFromList(musicList);
 		}
 		
 		return null;
@@ -186,13 +178,23 @@ public class MusicProperties {
 	//Find a music track that should be playing in the player's current situation from the given list
 	public static MusicProperties findTrackForCurrentSituationFromList(ArrayList<MusicProperties> propertyList) {
 		
+		int maxPriority = 1;
 		ArrayList<MusicProperties> releventList = new ArrayList<MusicProperties>();
 		
 		for(MusicProperties music : propertyList) {
 			
 			if(checkIfPropertiesApply(music.propertyList)) {
 				//If it all checks out, add it to the list
-				releventList.add(music);
+				
+				if(music.propertyList.priority > maxPriority) {
+					//We have a higher-priority track. Clear out all others.
+					releventList.clear();
+					maxPriority = music.propertyList.priority;
+				}
+				
+				if(music.propertyList.priority == maxPriority) {
+					releventList.add(music);
+				}
 			}
 			
 		}
@@ -204,22 +206,28 @@ public class MusicProperties {
 		return null;
 	}
 	
+	public static MusicProperties findBattleMusicFromBlacklist(String entityName) {
+		ArrayList<MusicProperties> releventList = new ArrayList<MusicProperties>();
+		
+		for(MusicProperties music : battleBlacklisted) {
+			if(music.propertyList.battleBlacklistEntities != null && !music.propertyList.battleBlacklistEntities.contains(entityName)) {
+				releventList.add(music);
+			}
+		}
+		
+		if(!releventList.isEmpty()) {
+			return findTrackForCurrentSituationFromList(releventList);
+		}
+		
+		return null;
+	}
+	
 	public static MusicProperties findTrackForAchievement(String achName) {
 		if(!achievementMap.containsKey(achName)) {
 			achName = "all";
 		}
 		
-		ArrayList<MusicProperties> achList = achievementMap.get(achName);
-		
-		if(achList == null) {
-			achList = new ArrayList<MusicProperties>();
-		}
-		
-		if(!achList.isEmpty()) {
-			return findTrackForCurrentSituationFromList(achList);
-		}
-			
-		return null;
+		return findMusicFromStringMap(achName, achievementMap);
 	}
 	
 	public static boolean checkIfMusicStillApplies(BackgroundMusic music, MusicTicker.MusicType vanillaMusicType) {
@@ -258,9 +266,10 @@ public class MusicProperties {
 		BiomeGenBase biome = mc.theWorld.getBiomeGenForCoords(x, z);
 		boolean isCreative = mc.thePlayer.capabilities.isCreativeMode;
 		Chunk chunk = mc.theWorld.getChunkFromBlockCoords(x, z);
-		boolean isArtificialLight = chunk.getSavedLightValue(EnumSkyBlock.Block, x & 15, y, z & 15) >= 7;
-		boolean isSky = chunk.getSavedLightValue(EnumSkyBlock.Sky, x & 15, y, z & 15) >= 7;
-		boolean isDay = mc.theWorld.getSunBrightness(1.0F) > 0.751F;
+		//Note for the two below: if below the world, assume it's "underground", and if above the world, assume it's open sky
+		boolean isArtificialLight = (y >= 0 && y < 256) ? chunk.getSavedLightValue(EnumSkyBlock.Block, x & 15, y, z & 15) >= 7 : false;
+		boolean isSky = (y >= 0 && y < 256) ? chunk.getSavedLightValue(EnumSkyBlock.Sky, x & 15, y, z & 15) >= 7 : y < 0 ? false : true;
+		boolean isDay = mc.theWorld.getSunBrightness(1.0F) > 0.5F;
 		boolean isRain = mc.theWorld.isRaining() && !mc.theWorld.isThundering();
 		boolean isStorm = mc.theWorld.isThundering();
 		boolean isClear = !(isRain || isStorm);
@@ -268,13 +277,17 @@ public class MusicProperties {
 		//Check if the player is in the right gamemode
 		if(!properties.allGamemodes) {
 			//If they are different
-			if(isCreative != !properties.creative) {
+			if(isCreative != properties.creative) {
 				return false;
 			}
 		}
 		
 		//Make sure this biome is allowed
 		if(properties.biomes != null && !properties.biomes.contains(biome.biomeName)) {
+			return false;
+		}
+		
+		if(properties.biomeBlacklist != null && properties.biomeBlacklist.contains(biome.biomeName)) {
 			return false;
 		}
 		
@@ -294,6 +307,14 @@ public class MusicProperties {
 			}
 		}
 		
+		if(properties.biomeTypeBlacklist != null) {
+			for (BiomeDictionary.Type type : BiomeDictionary.getTypesForBiome(biome)) {
+				if(properties.biomeTypeBlacklist.contains(type.name())) {
+					return false;
+				}
+			}
+		}
+		
 		//Make sure this dimension is allowed
 		if(properties.dimensions != null && !properties.dimensions.contains(dimension)) {
 			return false;
@@ -303,7 +324,17 @@ public class MusicProperties {
 			return false;
 		}
 		
+		//Check the lighting
 		if(properties.lighting != null) {
+			if(isDay && !properties.lighting.contains("day")) {
+				return false;
+			}
+			
+			if(!isDay && !properties.lighting.contains("night")) {
+				
+				return false;
+			}
+			
 			if(isSky && isDay && !properties.lighting.contains("sun")) {
 				return false;
 			}
@@ -345,57 +376,7 @@ public class MusicProperties {
 			return false;
 		}
 		
-		//Blocks
-		
-		if(!properties.blocks.isEmpty()) {
-			for(String blockName : properties.blocks) {
-				if(!checkForBlockInBoundingBox(blockName, 7, x, y ,z)) {
-					return false;
-				}
-			}
-		}
-		
-		//Entities
-		
-		if(!properties.entities.isEmpty()) {
-			List<Entity> entityList = mc.theWorld.getEntitiesWithinAABBExcludingEntity(null, AxisAlignedBB.getBoundingBox(x-7, y-7, z-7, x+7, y+7, z+7));
-			ArrayList<String> allEntityNames = new ArrayList<String>();
-
-			for(Entity entity : entityList) {
-				allEntityNames.add(entity.getCommandSenderName());
-			}
-			
-			for(String entityName : properties.entities) {
-				if(!allEntityNames.contains(entityName)) {
-					return false;
-				}
-			}
-		}
-		
 		return true;
-	}
-	
-	public static boolean checkForBlockInBoundingBox(String blockName, int radius, int posX, int posY, int posZ) {
-		
-		Object blockObj = Block.blockRegistry.getObject(blockName);
-		
-		if(blockObj == null || !(blockObj instanceof Block)) {
-			return false;
-		}
-		
-		Block block = (Block) blockObj;
-		
-		for(int x = -radius; x <= radius; x++) {
-			for(int y = -radius; y <= radius; y++) {
-				for(int z = -radius; z <= radius; z++) {
-					if(mc.theWorld.getBlock(posX + x, posY + y, posZ + z) == block) {
-						return true;
-					}
-				}
-			}
-		}
-		
-		return false;
 	}
 	
 	

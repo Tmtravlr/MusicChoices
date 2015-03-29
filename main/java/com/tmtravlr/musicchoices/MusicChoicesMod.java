@@ -35,7 +35,7 @@ public class MusicChoicesMod
 {
 	
     public static final String MODID = "musicchoices";
-    public static final String VERSION = "1.0_beta4";
+    public static final String VERSION = "1.0_beta5";
     
     @Instance(MODID)
 	public static MusicChoicesMod musicChoices;
@@ -76,6 +76,18 @@ public class MusicChoicesMod
 	public static int ingameTickDelayMin = 1200;
 	public static int ingameTickDelayMax = 3600;
 	
+	/** Play vanilla tracks */
+	public static boolean playVanilla = true;
+	
+	/** Stop tracks that no longer apply */
+	public static boolean stopTracks = true;
+	
+	/** Distance to stop battle music */
+	public static int battleDistance = 16;
+	
+	/** if this should play for "non-monster" entities */
+	public static boolean battleMonsterOnly = true;
+	
 	/************************/
   	
     
@@ -98,23 +110,33 @@ public class MusicChoicesMod
 		//Load the debug
 		config.load();
 		
-		debug = config.getBoolean("debug", "debug", false, "Turns on regular debug output.");
-		super_duper_debug = config.getBoolean("in-depth_debug", "debug", false, "Turns on more in-depth debug output.");
+		//debug
 		
+		debug = config.getBoolean("debug", "debug", false, "Turns on regular debug output.");
+		super_duper_debug = config.getBoolean("in-depth_debug", "debug", false, "Turns on more in-depth debug output. (Warning! This will spam your console!)");
+		
+		//options
 		
 		overrideJsonOptions = config.getBoolean("override json options", "options", false, "Set to true to override the options loaded in through the sounds.json files with these options.");
 		
 		maxBackground = config.getInt("maximum background tracks", "options", 3, 1, 10, "The maximum number of background tracks that can play at once (only one will be at full volume at a time).");
 		maxOvertop = config.getInt("maximum overtop tracks", "options", 1, 1, 10, "The maximum number of tracks that can play over top of the background music at once.");
 		
-		backgroundFade = config.getFloat("background fade", "options", 0.4f, 0.0001f, 1.0f, "How much the background music will fade to when something is playing over top of it. Note this is only when 'overtop' is true; otherwise it will fade to almost nothing.");
-		fadeStrength = config.getInt("fade strength", "options", 5, 1, 100, "How fast the background music fades when it changes volume.");
+		backgroundFade = config.getFloat("background fade", "options", 0.4f, 0.0001f, 1.0f, "How much the background music will fade to when something is playing over top of it. Note this is only when 'overtop' is true; otherwise it will always fade to almost nothing.");
+		fadeStrength = config.getInt("fade strength", "options", 5, 0, 100, "How fast the background music fades when it changes volume.");
 		
 		menuTickDelayMin = config.getInt("menu music delay minimum", "options", 20, 0, Integer.MAX_VALUE, "Minimum menu music delay.");
 		menuTickDelayMax = config.getInt("menu music delay maximum", "options", 600, 0, Integer.MAX_VALUE, "Maximum menu music delay.");
 		
 		ingameTickDelayMin = config.getInt("ingame music delay minimum", "options", 1200, 0, Integer.MAX_VALUE, "Minimum in-game music delay.");
 		ingameTickDelayMax = config.getInt("ingame music delay maximum", "options", 3600, 0, Integer.MAX_VALUE, "Maximum in-game music delay.");
+		
+		playVanilla = config.getBoolean("play vanilla", "options", true, "Play vanilla tracks as default if nothing else is found for the current situation.");
+		
+		stopTracks = config.getBoolean("stop tracks", "options", true, "Stop any background tracks that no longer apply (for instance when you move to a biome where it should no longer play) and attempt to play something new.");
+		
+		battleDistance = config.getInt("battle max distance", "options", 8, 1, Integer.MAX_VALUE, "The distance an enemy should be away from you for battle music to stop.");
+		battleMonsterOnly = config.getBoolean("battle music for only monsters", "options", true, "Only apply blacklisted battle tracks to entities considered monsters.");
 		
 		config.save();
 		

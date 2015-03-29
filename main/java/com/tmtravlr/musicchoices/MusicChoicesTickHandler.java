@@ -3,10 +3,9 @@ package com.tmtravlr.musicchoices;
 import java.util.List;
 import java.util.Random;
 
-import com.tmtravlr.musicchoices.MusicChoicesMusicTicker.BackgroundMusic;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.stats.Achievement;
 import net.minecraft.stats.AchievementList;
@@ -162,7 +161,8 @@ public class MusicChoicesTickHandler {
 				}
 			}
 			
-			if(MusicChoicesMod.ticker.bossMusic == null && !MusicProperties.bossMap.isEmpty() && bossCooldown-- <= 0) {
+			//Boss music
+			if(!MChHelper.isPlayingBossMusic() && !MusicProperties.bossMap.isEmpty() && bossCooldown-- <= 0) {
 				bossCooldown = 10;
 				
 				//See what entity the player is looking at, and play boss music if applicable. 
@@ -170,15 +170,13 @@ public class MusicChoicesTickHandler {
 				
 				Entity lookedAt = findEntityLookedAt();
 				
-				
-				
-				if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Entity looked at is " + lookedAt);
-				
 				if(lookedAt != null && lookedAt instanceof EntityLivingBase) {//mop.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY && mop.entityHit instanceof EntityLivingBase) {
+					if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Entity looked at is " + lookedAt + ", with id " + EntityList.getEntityString(lookedAt));
+					
 					EntityLivingBase entity = (EntityLivingBase) lookedAt;
 					
 					if(!entity.isDead && entity.getHealth() > 0) {
-						MusicProperties toPlay = MusicProperties.findBossBattleMusic(entity);
+						MusicProperties toPlay = MusicProperties.findMusicFromNBTMap(entity, MusicProperties.bossMap);
 						
 						if(toPlay != null) {
 							MusicChoicesMod.ticker.playBossMusic(toPlay);
@@ -192,6 +190,8 @@ public class MusicChoicesTickHandler {
 		else {
 			MusicChoicesMod.worldLoaded = false;
 		}
+		
+		
 	}
 	
 	private Entity findEntityLookedAt() {

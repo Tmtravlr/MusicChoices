@@ -30,6 +30,9 @@ public class MusicPropertyList {
 	
 	//Whether or not it should overlap with other music tracks
 	public boolean overlap = false;
+	
+	//Priority of the music. Higher priorities will try to play first
+	public int priority = 1;
 
 	//If the music should play in the menu
 	public boolean menu = false;
@@ -42,6 +45,18 @@ public class MusicPropertyList {
 
 	//Which bosses the victory music should play for
 	public HashSet<NBTTagCompound> victoryTags = new HashSet<NBTTagCompound>();
+	
+	//What to play if boss music finished without a victory
+	public HashSet<NBTTagCompound> bossStopTags = new HashSet<NBTTagCompound>();
+	
+	//Which entities to play battle music for
+	public HashSet<String> battleEntities = new HashSet<String>();
+	
+	//Which entities to play battle music for
+	public HashSet<String> battleBlacklistEntities = null;
+	
+	//Which entities to play battle end music for
+	public HashSet<String> battleStopEntities = new HashSet<String>();
 
 	//Play for all achievements?
 	public boolean allAchievements = false;
@@ -59,8 +74,14 @@ public class MusicPropertyList {
 	//Which biomes you should be in for this music to play
 	public HashSet<String> biomes = null;
 	
+	//Which biomes you should _not_ be in for this music to play
+	public HashSet<String> biomeBlacklist = new HashSet<String>();
+	
 	//Which biome types you should be in for this music to play
 	public HashSet<String> biomeTypes = null;
+	
+	//Which biome types you should _not_ be in for this music to play
+	public HashSet<String> biomeTypeBlacklist = new HashSet<String>();
 	
 	//Which dimensions you should be in for this music to play
 	public HashSet<Integer> dimensions = null;
@@ -79,12 +100,6 @@ public class MusicPropertyList {
 	
 	//The maximum height the music will play at
 	public int heightMax = Integer.MAX_VALUE;
-	
-	//Entities you should be near for this music to play
-	public HashSet<String> entities = new HashSet<String>();
-	
-	//Blocks you should be near for this music to play
-	public HashSet<String> blocks = new HashSet<String>();
 	
 	
 	
@@ -112,5 +127,20 @@ public class MusicPropertyList {
 	/** Tick delay for all ingame music */
 	public int ingameTickDelayMin = -1;
 	public int ingameTickDelayMax = -1;
+	
+	/** Play vanilla tracks */
+	public boolean doPlayVanilla = false;
+	public boolean playVanilla = true;
+	
+	/** Stop tracks that no longer apply */
+	public boolean doStopTracks = false;
+	public boolean stopTracks = true;
+	
+	/** Distance to stop battle music */
+	public int battleDistance = -1;
+	
+	/** if this should play for "non-monster" entities */
+	public boolean doBattleMonsterOnly = false;
+	public boolean battleMonsterOnly = true;
 	
 }

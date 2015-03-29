@@ -60,7 +60,7 @@ public class MusicTickable extends PositionedSound implements ITickableSound {
 
 	@Override
 	public boolean isDonePlaying() {
-		return volume < 0.0001f || !MusicChoicesMod.ticker.isSoundTracked(this);
+		return volume < 0.0001f || !MChHelper.isSoundTracked(this);
 	}
 
 }
