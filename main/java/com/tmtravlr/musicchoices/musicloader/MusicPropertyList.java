@@ -92,6 +92,9 @@ public class MusicPropertyList {
 	//Which lighting you should be in for this music to play
 	public HashSet<String> lighting = null;
 	
+	//Which time it should be for this music to play
+	public HashSet<String> time = null;
+	
 	//What weather the music will play in
 	public HashSet<String> weather = null;
 	

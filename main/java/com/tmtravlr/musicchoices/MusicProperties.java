@@ -97,7 +97,7 @@ public class MusicProperties {
 			return menuList.get(rand.nextInt(menuList.size()));
 		}
 		
-		if (!ingameList.isEmpty()) {
+		if (!ingameList.isEmpty() && mc.theWorld != null && mc.thePlayer != null) {
 			return findTrackForCurrentSituationFromList(ingameList);
 		}
 		
@@ -326,15 +326,6 @@ public class MusicProperties {
 		
 		//Check the lighting
 		if(properties.lighting != null) {
-			if(isDay && !properties.lighting.contains("day")) {
-				return false;
-			}
-			
-			if(!isDay && !properties.lighting.contains("night")) {
-				
-				return false;
-			}
-			
 			if(isSky && isDay && !properties.lighting.contains("sun")) {
 				return false;
 			}
@@ -348,6 +339,17 @@ public class MusicProperties {
 			}
 			
 			if(!isSky && !isArtificialLight && !properties.lighting.contains("dark")) {
+				return false;
+			}
+		}
+		
+		//Check the time
+		if(properties.time != null) {
+			if(isDay && !properties.time.contains("day")) {
+				return false;
+			}
+			
+			if(!isDay && !properties.time.contains("night")) {
 				return false;
 			}
 		}

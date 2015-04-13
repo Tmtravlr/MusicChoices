@@ -437,6 +437,24 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 			}
 		}
 		
+		if(jsonObject.has("time")) {
+			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as time music.");
+			otherElement = jsonObject.get("time");
+			if(JsonUtils.jsonObjectFieldTypeIsArray(jsonObject, "time")) {
+				JsonArray jsonarray = JsonUtils.getJsonObjectJsonArrayField(jsonObject, "time");
+
+				for (int i = 0; i < jsonarray.size(); ++i) {
+					otherElement = jsonarray.get(i);
+					String value = JsonUtils.getJsonElementStringValue(otherElement, "time");
+					if(properties.time == null) {
+						properties.time = new HashSet<String>();
+					}
+					properties.time.add(value);
+					if(MusicChoicesMod.debug) System.out.println("[Music Choices]     - time is " + value);
+				}
+			}
+		}
+		
 		if(jsonObject.has("weather")) {
 			if(MusicChoicesMod.debug) System.out.println("[Music Choices] - Marked as weather music.");
 			otherElement = jsonObject.get("weather");
