@@ -2,12 +2,12 @@ package com.tmtravlr.musicchoices;
 
 import com.tmtravlr.musicchoices.musicloader.MusicResourceReloadListener;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Client Proxy

@@ -33,17 +33,17 @@ public class MusicTickable extends PositionedSound implements ITickableSound {
 		this.volume = volume;
 		this.primary = true;
 		this.fadeVolume = volume;
-		this.field_147663_c = pitch;
+		this.pitch = pitch;
 		this.repeat = repeat;
-		this.field_147665_h = repeatDelay;
-		this.field_147666_i = attenuation;
+		this.repeatDelay = repeatDelay;
+		this.attenuationType = attenuation;
 		this.xPosF = posX;
 		this.yPosF = posY;
 		this.zPosF = posZ;
 	}
 	
 	public static MusicTickable copyFrom(ISound sound) {
-		return new MusicTickable(sound.getPositionedSoundLocation(), sound.getVolume(), sound.getPitch(), sound.canRepeat(), sound.getRepeatDelay(), sound.getAttenuationType(), sound.getXPosF(), sound.getYPosF(), sound.getZPosF());
+		return new MusicTickable(sound.getSoundLocation(), sound.getVolume(), sound.getPitch(), sound.canRepeat(), sound.getRepeatDelay(), sound.getAttenuationType(), sound.getXPosF(), sound.getYPosF(), sound.getZPosF());
 	}
 
 	@Override

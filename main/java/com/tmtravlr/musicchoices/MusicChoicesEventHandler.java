@@ -2,7 +2,6 @@ package com.tmtravlr.musicchoices;
 
 import java.util.Random;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundCategory;
 import net.minecraft.client.gui.GuiWinGame;
@@ -11,9 +10,10 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.client.event.sound.PlaySoundEvent17;
+import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * Event handler to play music when events happen.
@@ -27,10 +27,10 @@ public class MusicChoicesEventHandler {
 	private Random rand = new Random();
 	
 	@SubscribeEvent
-	public void onSound(PlaySoundEvent17 event) {
+	public void onSound(PlaySoundEvent event) {
 		
 		//Set any 
-		if((event.category == SoundCategory.MUSIC || event.category == SoundCategory.RECORDS) && !event.result.getPositionedSoundLocation().toString().contains("note.")) {
+		if((event.category == SoundCategory.MUSIC || event.category == SoundCategory.RECORDS) && !event.result.getSoundLocation().toString().contains("note.")) {
 			
 			if(event.result != null && !MChHelper.isSoundTracked(event.result)) {
 				MusicChoicesMod.ticker.setOvertopMusic(event.result, null);
@@ -118,7 +118,7 @@ public class MusicChoicesEventHandler {
 			MusicProperties toPlay = MusicProperties.findMusicFromStringMap(entityName, MusicProperties.battleMap);
 			
 			if(toPlay == null) {
-				if(!MusicChoicesMod.battleMonsterOnly || entity.isCreatureType(EnumCreatureType.monster, false)) {
+				if(!MusicChoicesMod.battleMonsterOnly || entity.isCreatureType(EnumCreatureType.MONSTER, false)) {
 					toPlay = MusicProperties.findBattleMusicFromBlacklist(entityName);
 				}
 			}

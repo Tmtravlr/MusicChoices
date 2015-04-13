@@ -14,13 +14,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.stats.Achievement;
 import net.minecraft.util.ReportedException;
 import net.minecraftforge.common.config.Configuration;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 /**
  * Main mod file! 
@@ -35,7 +34,7 @@ public class MusicChoicesMod
 {
 	
     public static final String MODID = "musicchoices";
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "1.0_for_1.8";
     
     @Instance(MODID)
 	public static MusicChoicesMod musicChoices;

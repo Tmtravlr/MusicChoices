@@ -17,6 +17,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
@@ -148,7 +149,7 @@ public class MusicProperties {
 	//Check that the target nbt tag has all the ones it should have
 	public static boolean hasAllTags(NBTTagCompound tagToHave, NBTTagCompound target) {
 		
-		Set<String> tagMap = tagToHave.func_150296_c();
+		Set<String> tagMap = tagToHave.getKeySet();
 		for(String tag : tagMap) {
 //			if(tagToHave.func_150299_b(tag) == 9 && target.func_150299_b(tag) == 9) {
 //				NBTTagList targetList = (NBTTagList)target.getTag(tag);
@@ -164,7 +165,7 @@ public class MusicProperties {
 //					}
 //				}
 //			}
-			if(tagToHave.func_150299_b(tag) == 10 && target.func_150299_b(tag) == 10) {
+			if(tagToHave.getTagType(tag) == 10 && target.getTagType(tag) == 10) {
 				return hasAllTags(tagToHave.getCompoundTag(tag), target.getCompoundTag(tag));
 			}
 			if(!tagToHave.getTag(tag).equals(target.getTag(tag))) {
@@ -234,7 +235,7 @@ public class MusicProperties {
 		
 		//If properties are null, assume this is a vanilla track.
 		if(music.properties == null) {
-			return vanillaMusicType.getMusicTickerLocation().equals(music.music.getPositionedSoundLocation());
+			return vanillaMusicType.getMusicLocation().equals(music.music.getSoundLocation());
 		}
 		
 		//First check for menu or credits music
@@ -259,16 +260,16 @@ public class MusicProperties {
 	}
 	
 	public static boolean checkIfPropertiesApply(MusicPropertyList properties) {
-		int dimension = mc.theWorld.provider.dimensionId;
+		int dimension = mc.theWorld.provider.getDimensionId();
 		int x = MathHelper.floor_double(mc.thePlayer.posX);
 		int y = MathHelper.floor_double(mc.thePlayer.posY);
 		int z = MathHelper.floor_double(mc.thePlayer.posZ);
-		BiomeGenBase biome = mc.theWorld.getBiomeGenForCoords(x, z);
+		BiomeGenBase biome = mc.theWorld.getBiomeGenForCoords(new BlockPos(x, 0, z));
 		boolean isCreative = mc.thePlayer.capabilities.isCreativeMode;
-		Chunk chunk = mc.theWorld.getChunkFromBlockCoords(x, z);
+		Chunk chunk = mc.theWorld.getChunkFromBlockCoords(new BlockPos(x, 0, z));
 		//Note for the two below: if below the world, assume it's "underground", and if above the world, assume it's open sky
-		boolean isArtificialLight = (y >= 0 && y < 256) ? chunk.getSavedLightValue(EnumSkyBlock.Block, x & 15, y, z & 15) >= 7 : false;
-		boolean isSky = (y >= 0 && y < 256) ? chunk.getSavedLightValue(EnumSkyBlock.Sky, x & 15, y, z & 15) >= 7 : y < 0 ? false : true;
+		boolean isArtificialLight = (y >= 0 && y < 256) ? chunk.getLightFor(EnumSkyBlock.BLOCK, new BlockPos(x & 15, y, z & 15)) >= 7 : false;
+		boolean isSky = (y >= 0 && y < 256) ? chunk.getLightFor(EnumSkyBlock.SKY, new BlockPos(x & 15, y, z & 15)) >= 7 : y < 0 ? false : true;
 		boolean isDay = mc.theWorld.getSunBrightness(1.0F) > 0.5F;
 		boolean isRain = mc.theWorld.isRaining() && !mc.theWorld.isThundering();
 		boolean isStorm = mc.theWorld.isThundering();

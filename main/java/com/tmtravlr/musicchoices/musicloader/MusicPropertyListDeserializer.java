@@ -34,7 +34,7 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 		if(MusicChoicesMod.super_duper_debug) System.out.println("[Music Choices] Found an entry!");
 		
 		JsonElement otherElement;
-		JsonObject jsonObject = JsonUtils.getJsonElementAsJsonObject(jsonElement, "entry");
+		JsonObject jsonObject = JsonUtils.getElementAsJsonObject(jsonElement, "entry");
 		MusicPropertyList properties = new MusicPropertyList();
 		
 		
@@ -493,7 +493,7 @@ public class MusicPropertyListDeserializer implements JsonDeserializer
 	private void loadNBTEntry(String nbtString, HashSet<NBTTagCompound> tagSet) {
 		NBTTagCompound tag = null;
 		try {
-            NBTBase nbtbase = JsonToNBT.func_150315_a(nbtString);
+            NBTBase nbtbase = JsonToNBT.func_180713_a(nbtString);
 
             if (nbtbase instanceof NBTTagCompound) {
             	tag = (NBTTagCompound)nbtbase;
