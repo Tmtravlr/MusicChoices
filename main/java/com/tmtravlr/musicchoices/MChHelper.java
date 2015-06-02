@@ -82,6 +82,10 @@ public class MChHelper {
 	}
 	
 	public static String getNameFromEntity(Entity entity) {
+		if(entity == null) {
+			return "null";
+		}
+		
 		Class entityClass = entity.getClass();
 		String entityName = (String) EntityList.classToStringMapping.get(entityClass);
 		

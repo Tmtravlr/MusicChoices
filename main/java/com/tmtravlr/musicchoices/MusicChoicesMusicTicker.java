@@ -121,6 +121,22 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 		
 		//Handle the battle music
 		
+		//If the world or player is null (exited out of the game) stop battle music
+		if(battleMusic != null && (mc.theWorld == null || mc.thePlayer == null)) {
+			battleMusic.music.fadeVolume = 0.0f;
+			
+			//Play battle finishing music
+			
+			MusicProperties stopMusic = MusicProperties.findMusicFromStringMap(battleEntityType, MusicProperties.battleStopMap);
+			
+			if(stopMusic != null) {
+				this.playOvertopMusic(stopMusic);
+			}
+			
+			this.battleEntityType = null;
+		}
+		
+		//Otherwise update battle music
 		if(!this.battleQueue.isEmpty()) {
 			boolean primaryPlaying = true;
 			

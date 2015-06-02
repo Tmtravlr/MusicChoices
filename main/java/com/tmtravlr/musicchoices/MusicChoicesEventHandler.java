@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
@@ -58,20 +59,32 @@ public class MusicChoicesEventHandler {
 	}
 	
 	@SubscribeEvent
-	public void onLivingHurt(LivingHurtEvent event) {
+	public void onAttack(AttackEntityEvent event) {
+		
+		if(event.target instanceof EntityLivingBase) {
+			triggerBattleMusic(event.entityLiving, (EntityLivingBase) event.target);
+		}
+	}
+	
+	private void triggerBattleMusic(EntityLivingBase attacker, EntityLivingBase target) {
+		
+		//Don't bother checking if there is no target
+		if(attacker == null) {
+			return;
+		}
 		
 		//First try to play boss music
 		if(!MChHelper.isPlayingBossMusic()) {
 			//First check the entity getting hit 
-			if(event.entityLiving != mc.thePlayer && event.source.getEntity() != null && event.source.getEntity() instanceof EntityPlayer) {
-				if(playBossMusicForEntity(event.entityLiving)) {
+			if(target != mc.thePlayer && attacker != null && attacker instanceof EntityPlayer) {
+				if(playBossMusicForEntity(target)) {
 					return;
 				}
 			}
 			
 			//Next check the entity hitting
-			if(event.entityLiving instanceof EntityPlayer && event.source.getEntity() != null && event.source.getEntity() instanceof EntityLivingBase && event.source.getEntity() != mc.thePlayer) {
-				if(playBossMusicForEntity((EntityLivingBase) event.source.getEntity())) {
+			if(target instanceof EntityPlayer && attacker != null && attacker instanceof EntityLivingBase && attacker != mc.thePlayer) {
+				if(playBossMusicForEntity((EntityLivingBase) attacker)) {
 					return;
 				}
 			}
@@ -80,15 +93,15 @@ public class MusicChoicesEventHandler {
 		//Then if nothing plays there, try to play battle music.
 		if(!MChHelper.isPlayingBattleMusic() && !MChHelper.isPlayingBossMusic()) {
 			//First check the entity getting hit 
-			if(event.entityLiving != mc.thePlayer && event.source.getEntity() != null && event.source.getEntity() instanceof EntityPlayer) {
-				if(playBattleMusicForEntity(event.entityLiving)) {
+			if(target != mc.thePlayer && attacker != null && attacker instanceof EntityPlayer) {
+				if(playBattleMusicForEntity(target)) {
 					return;
 				}
 			}
 			
 			//Next check the entity hitting
-			if(event.entityLiving instanceof EntityPlayer && event.source.getEntity() != null && event.source.getEntity() instanceof EntityLivingBase && event.source.getEntity() != mc.thePlayer) {
-				if(playBattleMusicForEntity((EntityLivingBase) event.source.getEntity())) {
+			if(target instanceof EntityPlayer && attacker != null && attacker instanceof EntityLivingBase && attacker != mc.thePlayer) {
+				if(playBattleMusicForEntity((EntityLivingBase) attacker)) {
 					return;
 				}
 			}
