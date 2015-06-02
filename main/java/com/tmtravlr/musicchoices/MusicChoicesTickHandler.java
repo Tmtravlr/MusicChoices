@@ -65,7 +65,7 @@ public class MusicChoicesTickHandler {
 					if(MusicChoicesMod.debug) System.out.println("[Music Choices] Looking for login music to play.");
 					MusicProperties toPlay = MusicProperties.findTrackForCurrentSituationFromList(MusicProperties.loginList);
 					if(toPlay != null) {
-						MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+						MusicChoicesMusicTicker.ticker.playOvertopMusic(toPlay);
 					}
 				}
 				
@@ -89,7 +89,7 @@ public class MusicChoicesTickHandler {
 	
 						if (toPlay != null)
 						{
-							MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+							MusicChoicesMusicTicker.ticker.playOvertopMusic(toPlay);
 						}
 					}
 				}
@@ -112,7 +112,7 @@ public class MusicChoicesTickHandler {
 								if(MusicChoicesMod.debug) System.out.println("[Music Choices] Looking for sunset music to play.");
 								MusicProperties toPlay = MusicProperties.findTrackForCurrentSituationFromList(MusicProperties.sunsetList);
 								if(toPlay != null) {
-									MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+									MusicChoicesMusicTicker.ticker.playOvertopMusic(toPlay);
 								}
 							}
 						}
@@ -122,7 +122,7 @@ public class MusicChoicesTickHandler {
 								if(MusicChoicesMod.debug) System.out.println("[Music Choices] Looking for sunrise music to play.");
 								MusicProperties toPlay = MusicProperties.findTrackForCurrentSituationFromList(MusicProperties.sunriseList);
 								if(toPlay != null) {
-									MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+									MusicChoicesMusicTicker.ticker.playOvertopMusic(toPlay);
 								}
 							}
 						}
@@ -144,7 +144,7 @@ public class MusicChoicesTickHandler {
 						if(MusicChoicesMod.debug) System.out.println("[Music Choices] Looking for death music to play.");
 						MusicProperties toPlay = MusicProperties.findTrackForCurrentSituationFromList(MusicProperties.deathList);
 						if(toPlay != null) {
-							MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+							MusicChoicesMusicTicker.ticker.playOvertopMusic(toPlay);
 						}
 					}
 				}
@@ -155,7 +155,7 @@ public class MusicChoicesTickHandler {
 						if(MusicChoicesMod.debug) System.out.println("[Music Choices] Looking for respawn music to play.");
 						MusicProperties toPlay = MusicProperties.findTrackForCurrentSituationFromList(MusicProperties.respawnList);
 						if(toPlay != null) {
-							MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+							MusicChoicesMusicTicker.ticker.playOvertopMusic(toPlay);
 						}
 					}
 				}
@@ -179,8 +179,8 @@ public class MusicChoicesTickHandler {
 						MusicProperties toPlay = MusicProperties.findMusicFromNBTMap(entity, MusicProperties.bossMap);
 						
 						if(toPlay != null) {
-							MusicChoicesMod.ticker.playBossMusic(toPlay);
-							MusicChoicesMod.ticker.bossEntity = entity;
+							MusicChoicesMusicTicker.ticker.playBossMusic(toPlay);
+							MusicChoicesMusicTicker.ticker.bossEntity = entity;
 						}
 					}
 				}

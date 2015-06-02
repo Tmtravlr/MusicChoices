@@ -21,6 +21,8 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 /**
  * Main mod file! 
@@ -30,23 +32,16 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
  * @author Rebeca Rey
  * @Date Febuary 2015 
  */
-@Mod(modid = MusicChoicesMod.MODID, version = MusicChoicesMod.VERSION)
+@Mod(modid = MusicChoicesMod.MODID, version = MusicChoicesMod.VERSION, name = "Music Choices")
 public class MusicChoicesMod
 {
 	
     public static final String MODID = "musicchoices";
-    public static final String VERSION = "1.0_for_1.7.10";
+    public static final String VERSION = "1.1_for_1.7.10";
     
     @Instance(MODID)
 	public static MusicChoicesMod musicChoices;
 
-	@SidedProxy(
-			clientSide = "com.tmtravlr.musicchoices.ClientProxy",
-			serverSide = "com.tmtravlr.musicchoices.CommonProxy"
-			)
-	public static CommonProxy proxy;
-    private static Minecraft mc = Minecraft.getMinecraft();
-    
     //Debug options
     public static boolean debug = false;
     public static boolean super_duper_debug = false;
@@ -91,9 +86,6 @@ public class MusicChoicesMod
 	/************************/
   	
     
-    //Handles what music should play; based on the MusicTicker class.
-    public static MusicChoicesMusicTicker ticker = new MusicChoicesMusicTicker(mc);
-    
     //When an achievement gets set to true in this map,
   	//the corresponding achievement music will try to play
   	public static Map<Achievement, Boolean> achievementsUnlocked = new HashMap();
@@ -103,6 +95,10 @@ public class MusicChoicesMod
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
+    	if(event.getSide() == Side.SERVER) {
+    		return; //Don't load on the server
+    	}
+    	
     	musicChoices = this;
     	
 		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
@@ -140,22 +136,29 @@ public class MusicChoicesMod
 		
 		config.save();
 		
-		proxy.registerEventHandlers();
-		proxy.registerTickHandlers();
-		proxy.registerResourceReloadListeners();
+		MChRegisterer.registerEventHandlers();
+		MChRegisterer.registerTickHandlers();
+		MChRegisterer.registerResourceReloadListeners();
     }
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
     	
+    	if(event.getSide() == Side.SERVER) {
+    		return; //Don't load on the server
+    	}
+    	
     	//Replace the vanilla music ticker with our custom one
+    	
+    	Minecraft mc = Minecraft.getMinecraft();
+    	MusicChoicesMusicTicker.ticker = new MusicChoicesMusicTicker(mc);
     	
     	try {
     		for(Field f : mc.getClass().getDeclaredFields()) {
     			if(f.getName().equals("mcMusicTicker") || f.getName().equals("field_147126_aw")) {
     				if(debug) System.out.println("[Music Choices] Found music ticker in Minecraft class.");
     				f.setAccessible(true);
-    				f.set(mc, ticker);
+    				f.set(mc, MusicChoicesMusicTicker.ticker);
     			}
     		}
     	}
@@ -166,6 +169,7 @@ public class MusicChoicesMod
     }
     
     public static boolean isGamePaused() {
+    	Minecraft mc = Minecraft.getMinecraft();
     	return mc.isSingleplayer() && mc.currentScreen != null && mc.currentScreen.doesGuiPauseGame() && !(mc.getIntegratedServer() != null && mc.getIntegratedServer().getPublic());
     }
 }

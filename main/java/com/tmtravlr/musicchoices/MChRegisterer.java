@@ -1,34 +1,25 @@
 package com.tmtravlr.musicchoices;
 
-import com.tmtravlr.musicchoices.musicloader.MusicResourceReloadListener;
-
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraftforge.common.MinecraftForge;
 
-/**
- * Client Proxy
- * 
- * @author Rebeca Rey
- * @Date Febuary 2015 
- */
-public class ClientProxy extends CommonProxy {
+import com.tmtravlr.musicchoices.musicloader.MusicResourceReloadListener;
 
-	@Override
-	public void registerEventHandlers() {
+import cpw.mods.fml.common.FMLCommonHandler;
+
+public class MChRegisterer {
+
+	public static void registerEventHandlers() {
 		MinecraftForge.EVENT_BUS.register(new MusicChoicesEventHandler());
 	}
 	
-	@Override
-	public void registerTickHandlers() {
+	public static void registerTickHandlers() {
 		FMLCommonHandler.instance().bus().register(new MusicChoicesTickHandler());
 	}
 	
-	@Override
-	public void registerResourceReloadListeners() {
+	public static void registerResourceReloadListeners() {
 		IResourceManager manager = Minecraft.getMinecraft().getResourceManager();
 		
 		if(manager != null && manager instanceof SimpleReloadableResourceManager) {

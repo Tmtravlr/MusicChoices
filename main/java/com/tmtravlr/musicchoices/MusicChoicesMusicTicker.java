@@ -31,7 +31,10 @@ import net.minecraft.util.ResourceLocation;
  */
 public class MusicChoicesMusicTicker extends MusicTicker {
 
-	private static final Random rand = new Random();
+	//Handles what music should play; based on the MusicTicker class.
+    public static MusicChoicesMusicTicker ticker;
+    
+    private static final Random rand = new Random();
 	private static final Minecraft mc = Minecraft.getMinecraft();
 	
 	public LinkedList<BackgroundMusic> backgroundQueue = new LinkedList<BackgroundMusic>();
@@ -262,6 +265,22 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 		
 		//Handle battle music
 		
+		//If the world or player is null (exited out of the game) stop battle music
+		if(battleMusic != null && (mc.theWorld == null || mc.thePlayer == null)) {
+			battleMusic.music.fadeVolume = 0.0f;
+			
+			//Play battle finishing music
+			
+			MusicProperties stopMusic = MusicProperties.findMusicFromStringMap(battleEntityType, MusicProperties.battleStopMap);
+			
+			if(stopMusic != null) {
+				this.playOvertopMusic(stopMusic);
+			}
+			
+			this.battleEntityType = null;
+		}
+		
+		//Otherwise update battle music
 		if(battleMusic != null) {
 			if(this.battleEntityType != null) {
 				Class entityClass = MChHelper.getEntityClassFromName(this.battleEntityType);
@@ -352,6 +371,7 @@ public class MusicChoicesMusicTicker extends MusicTicker {
 		
 		if(MusicChoicesMod.super_duper_debug) System.out.println(start + "End: ( Delay: " + delay + ", Primary: " + !backgroundQueue.isEmpty()  + ", Overtop: " + !overtopQueue.isEmpty() + ") ");
 
+		
 	}
 	
 	public void playCreditsMusic(MusicProperties prop) {

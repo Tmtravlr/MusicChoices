@@ -47,7 +47,7 @@ public class MChHelper {
 	}
 	
 	public static boolean isBackgroundTracked(ISound sound) {
-		for(BackgroundMusic music : MusicChoicesMod.ticker.backgroundQueue) {
+		for(BackgroundMusic music : MusicChoicesMusicTicker.ticker.backgroundQueue) {
 			if(music.music == sound) {
 				return true;
 			}
@@ -56,7 +56,7 @@ public class MChHelper {
 	}
 	
 	public static boolean isBattleTracked(ISound sound) {
-		for(BackgroundMusic music : MusicChoicesMod.ticker.battleQueue) {
+		for(BackgroundMusic music : MusicChoicesMusicTicker.ticker.battleQueue) {
 			if(music.music == sound) {
 				return true;
 			}
@@ -65,7 +65,7 @@ public class MChHelper {
 	}
 	
 	public static boolean isOvertopTracked(ISound sound) {
-		for(OvertopMusic overtop : MusicChoicesMod.ticker.overtopQueue) {
+		for(OvertopMusic overtop : MusicChoicesMusicTicker.ticker.overtopQueue) {
 			if(overtop.music == sound) {
 				return true;
 			}
@@ -74,14 +74,19 @@ public class MChHelper {
 	}
 	
 	public static boolean isPlayingBossMusic() {
-		return MusicChoicesMod.ticker.bossMusic != null || MusicChoicesMod.ticker.bossEntity != null;
+		return MusicChoicesMusicTicker.ticker.bossMusic != null || MusicChoicesMusicTicker.ticker.bossEntity != null;
 	}
 	
 	public static boolean isPlayingBattleMusic() {
-		return MusicChoicesMod.ticker.battleMusic != null || MusicChoicesMod.ticker.battleEntityType != null;
+		return MusicChoicesMusicTicker.ticker.battleMusic != null || MusicChoicesMusicTicker.ticker.battleEntityType != null;
 	}
 	
 	public static String getNameFromEntity(Entity entity) {
+		//Fixes random crashyness
+		if(entity == null) {
+			return "null";
+		}
+		
 		Class entityClass = entity.getClass();
 		String entityName = (String) EntityList.classToStringMapping.get(entityClass);
 		
