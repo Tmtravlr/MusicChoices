@@ -31,13 +31,12 @@ public class MusicChoicesEventHandler {
 	public void onSound(PlaySoundEvent17 event) {
 		
 		//Set any 
-		if((event.category == SoundCategory.MUSIC || event.category == SoundCategory.RECORDS) && !event.result.getPositionedSoundLocation().toString().contains("note.")) {
+		if((event.result != null && event.category == SoundCategory.MUSIC || event.category == SoundCategory.RECORDS) && !event.result.getPositionedSoundLocation().toString().contains("note.")) {
 			
-			if(event.result != null && !MChHelper.isSoundTracked(event.result)) {
+			if(!MChHelper.isSoundTracked(event.result)) {
 				MusicChoicesMusicTicker.ticker.setOvertopMusic(event.result, null);
 			}
 		}
-		
 	}
 	
 	/**
