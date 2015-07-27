@@ -31,9 +31,9 @@ public class MusicChoicesEventHandler {
 	public void onSound(PlaySoundEvent event) {
 		
 		//Set any 
-		if((event.category == SoundCategory.MUSIC || event.category == SoundCategory.RECORDS) && !event.result.getSoundLocation().toString().contains("note.")) {
+		if(event.result != null && (event.category == SoundCategory.MUSIC || event.category == SoundCategory.RECORDS) && !event.result.getSoundLocation().toString().contains("note.")) {
 			
-			if(event.result != null && !MChHelper.isSoundTracked(event.result)) {
+			if(!MChHelper.isSoundTracked(event.result)) {
 				MusicChoicesMod.ticker.setOvertopMusic(event.result, null);
 			}
 		}
