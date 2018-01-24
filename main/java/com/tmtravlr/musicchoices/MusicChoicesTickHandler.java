@@ -78,17 +78,19 @@ public class MusicChoicesTickHandler {
 				for (Object a : AchievementList.achievementList)
 				{
 					Achievement ach = (Achievement)a;
-	
-					if (mc.thePlayer.getStatFileWriter().hasAchievementUnlocked(ach) && !((Boolean)MusicChoicesMod.achievementsUnlocked.get(ach)).booleanValue())
+					if (mc.thePlayer.getStatFileWriter() != null && MusicChoicesMod.achievementsUnlocked.get(ach) != null)
 					{
-						if(MusicChoicesMod.debug) System.out.println("[Music Choices] Looking for achievement music for achievement " + ach.statId);
-						
-						MusicChoicesMod.achievementsUnlocked.put(ach, Boolean.valueOf(true));
-						MusicProperties toPlay = MusicProperties.findTrackForAchievement(ach.statId);
-	
-						if (toPlay != null)
+						if (mc.thePlayer.getStatFileWriter().hasAchievementUnlocked(ach) && !((Boolean)MusicChoicesMod.achievementsUnlocked.get(ach)).booleanValue())
 						{
-							MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+							if(MusicChoicesMod.debug) System.out.println("[Music Choices] Looking for achievement music for achievement " + ach.statId);
+
+							MusicChoicesMod.achievementsUnlocked.put(ach, Boolean.valueOf(true));
+							MusicProperties toPlay = MusicProperties.findTrackForAchievement(ach.statId);
+
+							if (toPlay != null)
+							{
+								MusicChoicesMod.ticker.playOvertopMusic(toPlay);
+							}
 						}
 					}
 				}
